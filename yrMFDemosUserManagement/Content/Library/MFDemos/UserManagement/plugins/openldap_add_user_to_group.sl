@@ -9,34 +9,36 @@ flow:
     - group_dn
     - user_dn
   workflow:
-    - ldap_add:
+    - ldap_modify:
         do:
-          YuvalRaiz.ldap.actions.ldap_add:
+          YuvalRaiz.ldap.actions.ldap_modify:
             - ldap_url: '${ldap_url}'
             - ldap_username: '${ldap_username}'
             - ldap_password:
                 value: '${ldap_password}'
                 sensitive: true
-            - dn: '${dn}'
-            - modlist: "${'''{\n 'objectClass': [b'posixAccount', b'top', b'inetOrgPerson'],\n 'cn': [b'%s'],\n 'displayName': [b'%s'],\n 'gidNumber': [b'%s'],\n 'givenName': [b'%s'],\n 'homeDirectory': [b'/'],\n 'sn': [b'%s'],\n 'uidNumber': [b'%s'],\n 'userPassword': [b'%s'],\n 'uid': [b'%s'],\n 'mail': [b'%s']%s%s\n}''' % (cn,display_name,gid_number,given_name,sn,uid_number,user_password,uid,mail,'' if second_mail is None else \",\\n'postalAddress': [b'\"+second_mail+\"']\",'' if manager_dn is None else \",\\n'manager': [b'\"+manager_dn+\"']\")}"
+            - dn: '${group_dn}'
+            - attr: member
+            - new_value: '${user_dn}'
+            - activity: add
         navigate:
           - SUCCESS: SUCCESS
           - FAILURE: on_failure
   results:
-    - FAILURE
     - SUCCESS
+    - FAILURE
 extensions:
   graph:
     steps:
-      ldap_add:
-        x: 167
-        'y': 147
+      ldap_modify:
+        x: 143
+        'y': 130
         navigate:
-          8690ff74-b920-66ab-8dd9-53ff73bfefcb:
+          78e51e9e-55ef-61e4-8319-8c05827280e2:
             targetId: 12e8c44f-1117-739d-bf25-6910156f294d
             port: SUCCESS
     results:
       SUCCESS:
         12e8c44f-1117-739d-bf25-6910156f294d:
-          x: 364
-          'y': 135
+          x: 341
+          'y': 133
