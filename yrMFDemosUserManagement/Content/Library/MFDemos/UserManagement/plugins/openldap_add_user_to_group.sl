@@ -1,3 +1,8 @@
+########################################################################################################################
+#!!
+#! @input group_dn: seperate by,
+#!!#
+########################################################################################################################
 namespace: MFDemos.UserManagement.plugins
 flow:
   name: openldap_add_user_to_group
@@ -10,17 +15,21 @@ flow:
     - user_dn
   workflow:
     - ldap_modify:
-        do:
-          YuvalRaiz.ldap.actions.ldap_modify:
-            - ldap_url: '${ldap_url}'
-            - ldap_username: '${ldap_username}'
-            - ldap_password:
-                value: '${ldap_password}'
-                sensitive: true
-            - dn: '${group_dn}'
-            - attr: member
-            - new_value: '${user_dn}'
-            - activity: add
+        loop:
+          for: "grp_dn in group_dn.split(',')"
+          do:
+            YuvalRaiz.ldap.actions.ldap_modify:
+              - ldap_url: '${ldap_url}'
+              - ldap_username: '${ldap_username}'
+              - ldap_password:
+                  value: '${ldap_password}'
+                  sensitive: true
+              - dn: '${grp_dn}'
+              - attr: member
+              - new_value: '${user_dn}'
+              - activity: add
+          break:
+            - FAILURE
         navigate:
           - SUCCESS: SUCCESS
           - FAILURE: on_failure
